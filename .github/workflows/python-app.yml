@@ -1,4 +1,4 @@
-0name: IRIS Homework CI
+name: IRIS Homework CI
 
 # Triggers
 on:
@@ -17,30 +17,18 @@ permissions:
 jobs:
   sanity_test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: feast_iris
-
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-
     - name: Set up Conda environment
       uses: conda-incubator/setup-miniconda@v3
       with:
-        environment-file: environment.yml
-        activate-environment: mlops-env     # replace with your env name if different
+        environment-file: iris_feast/environment.yml
+        activate-environment: base     # replace with your env name if different
         python-version: "3.10"
         auto-activate-base: false
 
     - name: Install additional tools
       shell: bash -l {0}
       run: |
-        python -m pip install --upgrade pip
         pip install flake8 pytest dvc[gs]
 
     - uses: iterative/setup-cml@v2
