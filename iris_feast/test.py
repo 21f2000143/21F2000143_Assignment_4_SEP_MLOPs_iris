@@ -5,7 +5,8 @@ import unittest
 
 
 class TestModel(unittest.TestCase):
-    def __init__(self):
+
+    def setUp(self):
         # Load model
         self.model = load("iris_model.bin")
 
