@@ -19,20 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: iris_feast
+        shell: bash -l {0}
 
     steps:
-    - name: Debug file structure
-      run: |
-        pwd
-        ls -R
-
     - name: Set up Conda environment
       uses: conda-incubator/setup-miniconda@v3
       with:
         environment-file: iris_feast/environment.yml
         activate-environment: base     # replace with your env name if different
-        python-version: "3.10"
         auto-activate-base: false
 
     - name: Install additional tools
