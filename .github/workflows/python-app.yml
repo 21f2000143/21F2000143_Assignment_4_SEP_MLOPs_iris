@@ -1,4 +1,4 @@
-0name: IRIS Homework CI
+name: IRIS Homework CI
 
 # Triggers
 on:
