@@ -1,0 +1,11 @@
+project: iris_feast
+# By default, the registry is a file (but can be turned into a more scalable SQL-backed registry)
+registry: data/registry.db
+# The provider primarily specifies default offline / online stores & storing the registry in a given cloud
+provider: gcp
+offline_store:
+  type: bigquery
+  dataset: 21f2000143_mlops_week3_ga_3_feast
+online_store:
+  type: sqlite
+  path: data/online_store.db

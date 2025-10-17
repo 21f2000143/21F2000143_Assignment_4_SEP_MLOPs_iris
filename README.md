@@ -49,3 +49,56 @@ This dataset was synthetically generated using a Python script:
 5.  The final DataFrame was saved in the efficient Parquet file format.
 
 ---
+
+## Assignment README Starts here
+
+### Clone the week_3 branch
+> Resource `https://github.com/IITMBSMLOps/ga_resources/tree/week_3`
+**Note** Make sure you clone the week3 branch only for the assignment
+```git clone --branch week_3 https://github.com/IITMBSMLOps/ga_resources.git```
+
+The custom data is available. We will follow the code but not the notebook.
+We will use python files
+
+### Get the terminal and activate the conda base env
+if not already activated use the command ```conda activate base```
+
+### Install Dependencies
+- feast[gcp] & scikit-learn ```pip install --quiet feast scikit-learn 'feast[gcp]'```
+
+### Initialize Feast Project
+- ```feast init iris_feast```
+
+### Set up your Goggle Cloud Platform (GCP) Configurations
+
+```gcloud config set project ivory-totem-474120-s5```
+```env GOOGLE_CLOUD_PROJECT=ivory-totem-474120-s5```
+```echo project_id = ivory-totem-474120-s5 > ~/.bigqueryrc```
+
+### Create GCS bucket
+```gsutil mb gs://21f2000143-mlops-week3-ga-3-feast```
+
+### Convert the iris_data_adapted_for_feast.csv into parquet
+> Convert and save it into `iris_feast/feature_repo/data/iris_stats.parquet`
+- Run: ```python transform_parquet.py```
+- delete the existing `driver_stats_parquet` file
+- Make changes into `ga_resources/iris_feast/feature_repo/feature_store.yaml` file as of the current file
+
+### Create Dataset and Table in BigQuery
+- Go to https://console.cloud.google.com/bigquery
+- Click "Create Dataset"
+- Name: 21f2000143_mlops_week3_ga_3_feast
+- Location: US
+- Inside that dataset, click "Create Table"
+- Source: Blank table
+- Table name: iris_hourly_stats
+
+**Note**: Ignore test_workflow.py file
+
+### Run Train
+- Run: ```python materialize_file.py```
+- Run: ```python view_materialize.py```
+- Run: ```python train.py```
+- Run: ```python test.py```
+
+> You are done!
