@@ -42,10 +42,9 @@ jobs:
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
         gcloud auth list
         dvc pull iris_feast/iris_model.bin.dvc
-    working-directory: ./iris_feast
     - name: Run unit tests
       run: |
-        python -m iris_feast.test 2>&1 | tee test_output.txt
+        cd iris_feast && python -m iris_feast.test 2>&1 | tee test_output.txt
 
     - name: Create CML report
       env:
