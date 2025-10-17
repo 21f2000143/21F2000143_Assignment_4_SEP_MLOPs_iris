@@ -14,29 +14,28 @@ permissions:
   contents: write
   pull-requests: write
 
+
 jobs:
-  sanity_test:
+  test_model:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
 
     steps:
-    - name: Set up Conda environment
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-        environment-file: iris_feast/environment.yml
-        activate-environment: base     # replace with your env name if different
-        auto-activate-base: false
+    - uses: actions/checkout@v4
 
-    - name: Install additional tools
-      shell: bash -l {0}
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
       run: |
-        pip install flake8 pytest dvc[gs]
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - uses: iterative/setup-cml@v2
 
-    - name: Authenticate to Google Cloud & Pull DVC Data
+    - name: Authenticate to Google Cloud & Pull DVC data
       env:
         GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS_JSON }}
       run: |
@@ -44,15 +43,14 @@ jobs:
         export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
         gcloud auth list
-        # Pull only required DVC files
         dvc pull model.keras.dvc
         dvc pull samples.dvc
 
-    - name: Run Unit Tests
+    - name: Run unit tests
       run: |
-        pytest tests/ --junitxml=test_results.xml 2>&1 | tee test_output.txt
+        python -m test 2>&1 | tee test_output.txt
 
-    - name: Create CML Report
+    - name: Create CML report
       env:
         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -60,15 +58,66 @@ jobs:
         echo "\`\`\`" >> report.md
         cat test_output.txt >> report.md
         echo "\`\`\`" >> report.md
-        if [ -f metrics.csv ]; then
-            echo "### Metrics from Training" >> report.md
-            cat metrics.csv >> report.md
-        fi
-        # Comment on PR or commit
+        echo "### Metrics from training" >> report.md
+        if [ -f metrics.csv ]; then cat metrics.csv >> report.md; fi
         cml comment create --publish report.md
 
-    - name: Upload CML Report Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: sanity-report
-        path: report.md
+
+# jobs:
+#   sanity_test:
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         shell: bash -l {0}
+
+#     steps:
+#     - name: Set up Conda environment
+#       uses: conda-incubator/setup-miniconda@v3
+#       with:
+#         environment-file: iris_feast/environment.yml
+#         activate-environment: base     # replace with your env name if different
+#         auto-activate-base: false
+
+#     - name: Install additional tools
+#       shell: bash -l {0}
+#       run: |
+#         pip install flake8 pytest dvc[gs]
+
+#     - uses: iterative/setup-cml@v2
+
+#     - name: Authenticate to Google Cloud & Pull DVC Data
+#       env:
+#         GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS_JSON }}
+#       run: |
+#         echo "$GCP_CREDENTIALS_JSON" > key.json
+#         export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
+#         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+#         gcloud auth list
+#         # Pull only required DVC files
+#         dvc pull model.keras.dvc
+#         dvc pull samples.dvc
+
+#     - name: Run Unit Tests
+#       run: |
+#         pytest tests/ --junitxml=test_results.xml 2>&1 | tee test_output.txt
+
+#     - name: Create CML Report
+#       env:
+#         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       run: |
+#         echo "### Test Output" > report.md
+#         echo "\`\`\`" >> report.md
+#         cat test_output.txt >> report.md
+#         echo "\`\`\`" >> report.md
+#         if [ -f metrics.csv ]; then
+#             echo "### Metrics from Training" >> report.md
+#             cat metrics.csv >> report.md
+#         fi
+#         # Comment on PR or commit
+#         cml comment create --publish report.md
+
+#     - name: Upload CML Report Artifact
+#       uses: actions/upload-artifact@v4
+#       with:
+#         name: sanity-report
+#         path: report.md
