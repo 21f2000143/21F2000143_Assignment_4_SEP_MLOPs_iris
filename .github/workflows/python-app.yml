@@ -25,12 +25,10 @@ jobs:
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
-        python-version: "3.10"
+        python-version: "3.13.2"
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install joblib scikit-learn
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - uses: iterative/setup-cml@v2
@@ -44,10 +42,9 @@ jobs:
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
         gcloud auth list
         dvc pull iris_feast/iris_model.bin.dvc
-
     - name: Run unit tests
       run: |
-        python -m iris_feast.test 2>&1 | tee test_output.txt
+        cd iris_feast && python -m test 2>&1 | tee test_output.txt
 
     - name: Create CML report
       env:
@@ -55,10 +52,10 @@ jobs:
       run: |
         echo "### Test Output" > report.md
         echo "\`\`\`" >> report.md
-        cat test_output.txt >> report.md
+        cat iris_feast/test_output.txt >> report.md
         echo "\`\`\`" >> report.md
         echo "### Metrics from training" >> report.md
-        if [ -f metrics.csv ]; then cat metrics.csv >> report.md; fi
+        if [ -f iris_feast/metrics.csv ]; then cat iris_feast/metrics.csv >> report.md; fi
         cml comment create --publish report.md
 
 
