@@ -1,0 +1,5 @@
+outs:
+- md5: 5bf6574731505910739ddc11fe245d7c
+  size: 1295
+  hash: md5
+  path: iris_model.bin

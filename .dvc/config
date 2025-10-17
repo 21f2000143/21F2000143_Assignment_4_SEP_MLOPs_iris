@@ -1,0 +1,4 @@
+[core]
+    remote = myremote
+['remote "myremote"']
+    url = gs://21f2000143-mlops-week4-ga-1-feast
