@@ -17,7 +17,16 @@ permissions:
 jobs:
   sanity_test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: iris_feast
+
     steps:
+    - name: Debug file structure
+      run: |
+        pwd
+        ls -R
+
     - name: Set up Conda environment
       uses: conda-incubator/setup-miniconda@v3
       with:
