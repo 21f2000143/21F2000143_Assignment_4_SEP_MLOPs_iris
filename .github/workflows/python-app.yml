@@ -21,17 +21,23 @@ jobs:
 
     services:
       mlflow:
-        image: ghcr.io/mlflow/mlflow
+        image: ghcr.io/mlflow/mlflow:latest
         ports:
           - 8100:8100
         volumes:
-        - ./mlruns:/mlartifacts
-        - ./mlflow.db:/mlflow.db
+          - ${{ github.workspace }}/mlruns:/mlartifacts
+          - ${{ github.workspace }}/mlflow.db:/mlflow.db
         options: >-
-          --health-cmd="curl --fail http://localhost:8100 || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd="curl --silent --fail http://localhost:8100/health || exit 1"
+          --health-interval=15s
+          --health-start-period=30s
+          --health-retries=6
+        command: >
+          mlflow server
+          --backend-store-uri sqlite:///mlflow.db
+          --default-artifact-root /mlartifacts
+          --host 0.0.0.0
+          --port 8100
 
     steps:
     - uses: actions/checkout@v4
