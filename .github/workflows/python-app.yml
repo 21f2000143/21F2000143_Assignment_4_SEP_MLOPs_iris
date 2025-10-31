@@ -19,26 +19,6 @@ jobs:
   test_model:
     runs-on: ubuntu-latest
 
-    services:
-      mlflow:
-        image: ghcr.io/mlflow/mlflow:latest
-        ports:
-          - 8100:8100
-        volumes:
-          - ${{ github.workspace }}/mlruns:/mlartifacts
-          - ${{ github.workspace }}/mlflow.db:/mlflow.db
-        options: >-
-          --health-cmd="curl --silent --fail http://localhost:8100/health || exit 1"
-          --health-interval=15s
-          --health-start-period=30s
-          --health-retries=6
-        command: >
-          mlflow server
-          --backend-store-uri sqlite:///mlflow.db
-          --default-artifact-root /mlartifacts
-          --host 0.0.0.0
-          --port 8100
-
     steps:
     - uses: actions/checkout@v4
 
@@ -61,6 +41,10 @@ jobs:
         echo "$GCP_CREDENTIALS_JSON" > key.json
         export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+      
+    - services:
+      mlflow:
+        mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlartifacts --host 0.0.0.0 --port 8100
     - name: Run unit tests
       env:
         MLFLOW_TRACKING_URI: http://127.0.0.1:8100
