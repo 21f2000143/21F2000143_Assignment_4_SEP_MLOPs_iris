@@ -30,10 +30,18 @@ print("Printing data obtained from the feast store")
 print(features_df.head())
 print(features_df.info())
 
+
 # Train model
 target = "iris_id"
 
-reg = LogisticRegression(max_iter=200)
+params = {
+    "criterion": "gini",
+    "max_depth": 3,
+    "min_samples_split": 3,
+    "random_state": 42
+}
+
+reg = DecisionTreeClassifier(**params)
 features_df = features_df.drop(columns=["event_timestamp"])
 print("Splitting data into train and test sets")
 train, test = train_test_split(features_df, test_size = 0.4, stratify = features_df['iris_id'], random_state = 42)
@@ -63,6 +71,27 @@ print(f"Validation loss: {val_loss}")
 
 today = date.today().isoformat()  # YYYY-MM-DD
 
+# Log the run to MLflow
+from mlflow_setup import mlflow
+
+with mlflow.start_run(run_name="LogReg_C1.2"):
+    mlflow.log_params(params)
+
+    mlflow.log_metric("train_accuracy", train_accuracy)
+    mlflow.log_metric("train_loss", train_loss)
+    mlflow.log_metric("val_accuracy", val_accuracy)
+    mlflow.log_metric("val_loss", val_loss)
+    mlflow.set_tag("model_name", "Iris_Classification")
+
+    signature = mlflow.models.infer_signature(X_train, reg.predict(X_train))
+    
+    model_info = mlflow.sklearn.log_model(
+        sk_model=reg,
+        name="iris_model",
+        signature=signature,
+        registered_model_name="Iris_Classification_Model"
+    )
+
 # Append metrics to the same CSV file with a date column (date only, no time)
 with open("metrics.csv", "a") as f:
     f.write("\n")  # separator row
@@ -70,4 +99,4 @@ with open("metrics.csv", "a") as f:
     f.write(f"{today},{train_accuracy},{train_loss},{val_accuracy},{val_loss}\n")
 
 # Save model
-dump(reg, "iris_model.bin")
+# dump(reg, "iris_model.bin")

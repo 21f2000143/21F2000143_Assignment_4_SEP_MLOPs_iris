@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/215475122589526076/c686b64c6ed643808af6322c5c7f2568/artifacts
+deleted_time: 1761903856517
+end_time: 1761903431619
+entry_point_name: ''
+experiment_id: '215475122589526076'
+lifecycle_stage: deleted
+run_id: c686b64c6ed643808af6322c5c7f2568
+run_name: carefree-roo-683
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761903430247
+status: 3
+tags: []
+user_id: sachin

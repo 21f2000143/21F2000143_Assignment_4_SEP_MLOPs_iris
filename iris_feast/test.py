@@ -3,19 +3,28 @@ import feast
 from joblib import load
 import unittest
 
+# evaluation of mlflow latest model
+import mlflow
+from mlflow import MlflowClient
 
 class TestModel(unittest.TestCase):
 
     def setUp(self):
         # Load model
-        self.model = load("iris_model.bin")
+        mlflow.set_tracking_uri("http://0.0.0.0:8100")
+        model_name = "Iris_Classification_Model"
+        client = MlflowClient()
+        latest_versions = client.get_latest_versions(model_name)
+        latest_version = max([int(v.version) for v in latest_versions])
+        print(f"Testing model: {model_name}, version: {latest_version}")
+        self.model = mlflow.sklearn.load_model(model_uri=f"models:/{model_name}/{latest_version}")
 
         # Set up feature store
         self.fs = feast.FeatureStore(repo_path="feature_repo/")
 
     def test_sample1(self):
         # Read features from Feast
-        iris_ids = [1001]
+        iris_ids = [1002]
         iris_features = self.fs.get_online_features(
             entity_rows=[{"iris_id": iris_id} for iris_id in iris_ids],
             features=[
@@ -39,7 +48,7 @@ class TestModel(unittest.TestCase):
 
         self.assertEqual(
             encoder_dic[iris_features.loc[0, "prediction"]],
-            'versicolor',
+            'setosa',
             "Prediction class is wrong"
         )
 
