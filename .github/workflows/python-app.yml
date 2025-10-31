@@ -24,6 +24,9 @@ jobs:
         image: ghcr.io/mlflow/mlflow
         ports:
           - 8100:8100
+        volumes:
+        - ./mlruns:/mlartifacts
+        - ./mlflow.db:/mlflow.db
         options: >-
           --health-cmd="curl --fail http://localhost:8100 || exit 1"
           --health-interval=10s
@@ -59,6 +62,8 @@ jobs:
         export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
     - name: Run unit tests
+      env:
+        MLFLOW_TRACKING_URI: http://127.0.0.1:8100
       run: |
         cd iris_feast && python -m test 2>&1 | tee test_output.txt
 
