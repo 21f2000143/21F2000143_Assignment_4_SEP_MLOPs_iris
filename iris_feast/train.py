@@ -36,8 +36,8 @@ target = "iris_id"
 
 params = {
     "criterion": "gini",
-    "max_depth": 5,
-    "min_samples_split": 4,
+    "max_depth": 3,
+    "min_samples_split": 3,
     "random_state": 42
 }
 
@@ -74,7 +74,7 @@ today = date.today().isoformat()  # YYYY-MM-DD
 # Log the run to MLflow
 from mlflow_setup import mlflow
 
-with mlflow.start_run(run_name="LogReg_C1.0"):
+with mlflow.start_run(run_name="LogReg_C1.2"):
     mlflow.log_params(params)
 
     mlflow.log_metric("train_accuracy", train_accuracy)
@@ -99,4 +99,4 @@ with open("metrics.csv", "a") as f:
     f.write(f"{today},{train_accuracy},{train_loss},{val_accuracy},{val_loss}\n")
 
 # Save model
-dump(reg, "iris_model.bin")
+# dump(reg, "iris_model.bin")

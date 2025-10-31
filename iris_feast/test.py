@@ -24,7 +24,7 @@ class TestModel(unittest.TestCase):
 
     def test_sample1(self):
         # Read features from Feast
-        iris_ids = [1003]
+        iris_ids = [1002]
         iris_features = self.fs.get_online_features(
             entity_rows=[{"iris_id": iris_id} for iris_id in iris_ids],
             features=[
@@ -48,7 +48,7 @@ class TestModel(unittest.TestCase):
 
         self.assertEqual(
             encoder_dic[iris_features.loc[0, "prediction"]],
-            'virginica',
+            'setosa',
             "Prediction class is wrong"
         )
 

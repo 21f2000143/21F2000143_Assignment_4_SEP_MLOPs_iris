@@ -1,104 +1,138 @@
-# MLOps Graded Assignment - Week 3 Resources 
+# 🚀 MLflow Setup and Integration Guide
 
-# Time-Aware Iris Dataset for Feast Tutorial
+## 📘 Overview
 
-## Overview
-
-This directory contains a modified, time-series version of the classic Iris dataset. It has been specifically generated to be compatible with the [Feast feature store](https://feast.dev/) and is intended for use in a hands-on tutorial.
-
-Unlike the original static dataset, this version simulates the tracking of features for a few individual iris plants over a period of time, making it suitable for demonstrating real-world feature store concepts.
+This document provides step-by-step instructions to set up **MLflow**.
 
 ---
 
-## The Problem with the Standard Iris Dataset
+## 🧠 Objective
 
-The standard Iris dataset is a simple table of 150 measurements. While excellent for basic classification tasks, it is unsuitable for demonstrating a feature store because it lacks:
+Integrate **MLflow** into the homework pipeline by:
 
-1.  **An Entity**: There is no unique identifier for the object being measured (e.g., a specific plant ID). Feast requires an entity to associate features with.
-2.  **Timestamps**: All data exists at a single, unknown point in time. Feast is built around time-series data to provide point-in-time correctness and prevent data leakage in training sets.
-
-This dataset solves these issues by introducing an `iris_id` as the entity and an `event_timestamp` for each feature measurement.
-
----
-
-## Dataset Schema
-
-The data is stored in the `iris_data_adapted_for_feast.csv` file and has the following columns:
-
-| Column Name         | Data Type | Description                                                                                                                                                             | Feast Role             |
-| ------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `event_timestamp`   | Timestamp | The exact UTC timestamp when the measurement was recorded. This is crucial for historical lookups and point-in-time joins.                                               | **Timestamp Field** |
-| `iris_id`           | Integer   | A unique identifier for each individual iris plant being tracked.                                                                                                         | **Entity Key** |
-| `sepal_length`      | Float     | The length of the sepal in centimeters.                                                                                                                                 | Feature                |
-| `sepal_width`       | Float     | The width of the sepal in centimeters.                                                                                                                                  | Feature                |
-| `petal_length`      | Float     | The length of the petal in centimeters.                                                                                                                                 | Feature                |
-| `petal_width`       | Float     | The width of the petal in centimeters.                                                                                                                                  | Feature                |
-| `species`           | String    | The species of the iris plant (`setosa`, `versicolor`, or `virginica`). Can be used as a feature or a prediction target (label).                                          | Feature / Label        |
-| `created_timestamp` | Timestamp | The UTC timestamp when the data row was created or ingested. Feast can use this to resolve data freshness.                                                                | **Created Timestamp** |
+* Introducing **hyperparameter tuning** in the training loop.
+* Logging **experiment parameters**, **evaluation metrics**, and **models** using MLflow.
+* Demonstrating comparison of experiments via **Metric Visualization** in the MLflow UI.
+* Removing existing model logging dependency from **DVC**.
+* Modifying the evaluation pipeline to **fetch the best/latest model** from the MLflow registry.
+* *(Optional)* Integrating **CI** to utilize models from MLflow for sanity checks.
 
 ---
 
-## How The Data Was Generated
+## 🧰 Step 1: Install and Start MLflow
 
-This dataset was synthetically generated using a Python script:
+1. Install MLflow:
 
-1.  The base data comes from the `scikit-learn` Iris dataset.
-2.  We simulated **3 unique iris plants** and assigned each an `iris_id` (1001, 1002, 1003).
-3.  For each plant, we generated **15 days of sequential data**, creating a unique `event_timestamp` for each day.
-4.  To simulate real-world variance, a small amount of random noise was added to the feature measurements (`sepal_length`, etc.) for each timestamp.
-5.  The final DataFrame was saved in the efficient Parquet file format.
+   ```bash
+   pip install mlflow
+   ```
+2. Start the MLflow Tracking Server:
+
+   ```bash
+   mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 8100
+   ```
 
 ---
 
-## Assignment README Starts here
+## 💻 Step 2: Access MLflow from Local Machine
 
-### Clone the week_3 branch
-> Resource `https://github.com/IITMBSMLOps/ga_resources/tree/week_3`
-**Note** Make sure you clone the week3 branch only for the assignment
-```git clone --branch week_3 https://github.com/IITMBSMLOps/ga_resources.git```
+Use the **external IP** of your instance and the configured port to access MLflow:
 
-The custom data is available. We will follow the code but not the notebook.
-We will use python files
+```
+http://<external-ip>:8100
+```
 
-### Get the terminal and activate the conda base env
-if not already activated use the command ```conda activate base```
+---
 
-### Install Dependencies
-- feast[gcp] & scikit-learn ```pip install --quiet feast scikit-learn 'feast[gcp]'```
+## 📔 Step 3: Integrate MLflow into Your Pipeline
 
-### Initialize Feast Project
-- ```feast init iris_feast```
+1. Import MLflow in your training script:
 
-### Set up your Goggle Cloud Platform (GCP) Configurations
+   ```python
+    # Setup mlflow tracking
+    import mlflow
+    from mlflow import MlflowClient
+    from mlflow.models import infer_signature
+    from pprint import pprint
 
-```gcloud config set project ivory-totem-474120-s5```
-```env GOOGLE_CLOUD_PROJECT=ivory-totem-474120-s5```
-```echo project_id = ivory-totem-474120-s5 > ~/.bigqueryrc```
+    # Check if MLflow server is running and list experiments
+    mlflow.set_tracking_uri("http://127.0.0.1:8100")
+    client = MlflowClient(mlflow.get_tracking_uri())
+    all_experiments = client.search_experiments()
+    print("Existing experiments:")
+    pprint([exp.name for exp in all_experiments])
+    print("The tracking URI is set to:", mlflow.get_tracking_uri())
 
-### Create GCS bucket
-```gsutil mb gs://21f2000143-mlops-week3-ga-3-feast```
+    print("setting the experiment to 'Iris_Classification'")
+    mlflow.set_experiment("Iris_Classification")
 
-### Convert the iris_data_adapted_for_feast.csv into parquet
-> Convert and save it into `iris_feast/feature_repo/data/iris_stats.parquet`
-- Run: ```python transform_parquet.py```
-- delete the existing `driver_stats_parquet` file
-- Make changes into `ga_resources/iris_feast/feature_repo/feature_store.yaml` file as of the current file
 
-### Create Dataset and Table in BigQuery
-- Go to https://console.cloud.google.com/bigquery
-- Click "Create Dataset"
-- Name: 21f2000143_mlops_week3_ga_3_feast
-- Location: US
-- Inside that dataset, click "Create Table"
-- Source: Blank table
-- Table name: iris_hourly_stats
+   with mlflow.start_run(run_name="LogReg_C1.0"):
+        mlflow.log_params(params)
 
-**Note**: Ignore test_workflow.py file
+        mlflow.log_metric("train_accuracy", train_accuracy)
+        mlflow.log_metric("train_loss", train_loss)
+        mlflow.log_metric("val_accuracy", val_accuracy)
+        mlflow.log_metric("val_loss", val_loss)
+        mlflow.set_tag("model_name", "Iris_Classification")
 
-### Run Train
-- Run: ```python materialize_file.py```
-- Run: ```python view_materialize.py```
-- Run: ```python train.py```
-- Run: ```python test.py```
+        signature = mlflow.models.infer_signature(X_train, reg.predict(X_train))
+        
+        model_info = mlflow.sklearn.log_model(
+            sk_model=reg,
+            name="iris_model",
+            signature=signature,
+            registered_model_name="Iris_Classification_Model"
+        )
+   ```
+2. Modify your pipeline to include hyperparameter tuning loops and log parameters/metrics accordingly.
 
-> You are done!
+---
+
+## 🧮 Step 4: Compare Experiments
+
+Try out different runs `run_name="LogReg_C0.1"`, `run_name="LogReg_C1.0"`, etc., with varying hyperparameters and log them using MLflow. Compare the results in the MLflow UI.
+
+---
+
+## 🧹 Step 5: Remove DVC Dependency
+
+Remove any existing model logging or versioning code related to DVC from your training and evaluation scripts.
+
+```mlflow server \
+  --backend-store-uri sqlite:///mlflow.db \
+  --default-artifact-root ./mlruns \
+  --host 0.0.0.0 \
+  --port 8100
+```
+
+```python
+# evaluation of mlflow latest model
+import mlflow
+from mlflow import MlflowClient
+
+# add this nippet of code to the test module
+mlflow.set_tracking_uri("http://0.0.0.0:8100")
+model_name = "Iris_Classification_Model"
+client = MlflowClient()
+latest_versions = client.get_latest_versions(model_name)
+latest_version = max([int(v.version) for v in latest_versions])
+print(f"Testing model: {model_name}, version: {latest_version}")
+self.model = mlflow.sklearn.load_model(model_uri=f"models:/{model_name}/{latest_version}")
+```
+
+---
+
+## 🔄 Step 6: Adding it to ci
+
+Modify your evaluation pipeline:
+
+```yml
+- name: Start MLflow server (optional for testing)
+    run: |
+    mlflow server --backend-store-uri sqlite:///mlflow.db \
+                    --default-artifact-root ./mlruns \
+                    --host 127.0.0.1 --port 8100 &
+    sleep 20  # wait for server to start
+```
+
