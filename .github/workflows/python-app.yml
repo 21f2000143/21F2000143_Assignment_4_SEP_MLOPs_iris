@@ -19,6 +19,17 @@ jobs:
   test_model:
     runs-on: ubuntu-latest
 
+    services:
+      mlflow:
+        image: ghcr.io/mlflow/mlflow:latest
+        ports:
+          - 8100:8100
+        options: >-
+          --health-cmd="curl --fail http://localhost:8100 || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
     - uses: actions/checkout@v4
 
@@ -36,12 +47,11 @@ jobs:
     - name: Authenticate to Google Cloud & Pull DVC data
       env:
         GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS_JSON }}
+        MLFLOW_TRACKING_URI: http://127.0.0.1:8100
       run: |
         echo "$GCP_CREDENTIALS_JSON" > key.json
         export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-        gcloud auth list
-        dvc pull iris_feast/iris_model.bin.dvc
     - name: Run unit tests
       run: |
         cd iris_feast && python -m test 2>&1 | tee test_output.txt
