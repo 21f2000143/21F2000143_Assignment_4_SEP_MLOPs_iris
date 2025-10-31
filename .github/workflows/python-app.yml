@@ -29,6 +29,12 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+        command: >
+          mlflow server
+          --backend-store-uri sqlite:///mlflow.db
+          --default-artifact-root /mlartifacts
+          --host 0.0.0.0
+          --port 8100
 
     steps:
     - uses: actions/checkout@v4
