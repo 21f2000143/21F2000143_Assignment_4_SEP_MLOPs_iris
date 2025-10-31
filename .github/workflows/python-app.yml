@@ -41,10 +41,9 @@ jobs:
         echo "$GCP_CREDENTIALS_JSON" > key.json
         export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-      
-    - services:
-      mlflow:
-        mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlartifacts --host 0.0.0.0 --port 8100
+        gcloud auth list
+        # Pull only required DVC files
+        dvc pull iris_feast/model.keras.dvc
     - name: Run unit tests
       env:
         MLFLOW_TRACKING_URI: http://127.0.0.1:8100
