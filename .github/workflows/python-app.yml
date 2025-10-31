@@ -19,13 +19,6 @@ jobs:
   test_model:
     runs-on: ubuntu-latest
 
-    services:
-      mlflow:
-        name : install mlflow
-        run : |
-          pip install mlflow
-          mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlartifacts --host 0.0.0.0 --port 8100
-
     steps:
     - uses: actions/checkout@v4
 
@@ -47,6 +40,8 @@ jobs:
         echo "$GCP_CREDENTIALS_JSON" > key.json
         export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+        gcloud auth list
+        dvc pull iris_feast/iris_model.bin.dvc
 
     - name: Run unit tests
       env:
@@ -66,62 +61,3 @@ jobs:
         if [ -f iris_feast/metrics.csv ]; then cat iris_feast/metrics.csv >> report.md; fi
         cml comment create --publish report.md
 
-
-# jobs:
-#   sanity_test:
-#     runs-on: ubuntu-latest
-#     defaults:
-#       run:
-#         shell: bash -l {0}
-
-#     steps:
-#     - name: Set up Conda environment
-#       uses: conda-incubator/setup-miniconda@v3
-#       with:
-#         environment-file: iris_feast/environment.yml
-#         activate-environment: base     # replace with your env name if different
-#         auto-activate-base: false
-
-#     - name: Install additional tools
-#       shell: bash -l {0}
-#       run: |
-#         pip install flake8 pytest dvc[gs]
-
-#     - uses: iterative/setup-cml@v2
-
-#     - name: Authenticate to Google Cloud & Pull DVC Data
-#       env:
-#         GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS_JSON }}
-#       run: |
-#         echo "$GCP_CREDENTIALS_JSON" > key.json
-#         export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
-#         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-#         gcloud auth list
-#         # Pull only required DVC files
-#         dvc pull model.keras.dvc
-#         dvc pull samples.dvc
-
-#     - name: Run Unit Tests
-#       run: |
-#         pytest tests/ --junitxml=test_results.xml 2>&1 | tee test_output.txt
-
-#     - name: Create CML Report
-#       env:
-#         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#       run: |
-#         echo "### Test Output" > report.md
-#         echo "\`\`\`" >> report.md
-#         cat test_output.txt >> report.md
-#         echo "\`\`\`" >> report.md
-#         if [ -f metrics.csv ]; then
-#             echo "### Metrics from Training" >> report.md
-#             cat metrics.csv >> report.md
-#         fi
-#         # Comment on PR or commit
-#         cml comment create --publish report.md
-
-#     - name: Upload CML Report Artifact
-#       uses: actions/upload-artifact@v4
-#       with:
-#         name: sanity-report
-#         path: report.md
