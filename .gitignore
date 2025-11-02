@@ -206,3 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 ivory-totem-474120-s5-ae49881eba91.json
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
