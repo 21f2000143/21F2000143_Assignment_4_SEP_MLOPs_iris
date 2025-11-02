@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN pip install fastapi uvicorn pandas numpy joblib
+RUN pip install -U scikit-learn
 
 COPY . .
 

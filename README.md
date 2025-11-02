@@ -44,6 +44,18 @@ Build the Docker image:
 docker build -t iris-app:latest .
 ```
 
+- Create the container and start
+```bash
+docker run -d --name iris-model -p 8000:8000 iris-app:latest
+```
+- Start the existing container
+```bash
+docker start iris-model
+```
+```docker run -d --name musicapp -p 127.0.0.1:3000:3000 getting-started```
+## To start an existing container
+```docker start musicapp```
+
 ```
 http://<external-ip>:8100
 ```
