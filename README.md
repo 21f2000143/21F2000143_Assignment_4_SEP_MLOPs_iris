@@ -2,45 +2,47 @@
 
 ## 📘 Overview
 
-This document provides step-by-step instructions to set up **MLflow**.
+This document provides step-by-step instructions to set up Deployment of ml pipeline.
 
 ---
 
 ## 🧠 Objective
 
-Integrate **MLflow** into the homework pipeline by:
-
-* Introducing **hyperparameter tuning** in the training loop.
-* Logging **experiment parameters**, **evaluation metrics**, and **models** using MLflow.
-* Demonstrating comparison of experiments via **Metric Visualization** in the MLflow UI.
-* Removing existing model logging dependency from **DVC**.
-* Modifying the evaluation pipeline to **fetch the best/latest model** from the MLflow registry.
-* *(Optional)* Integrating **CI** to utilize models from MLflow for sanity checks.
-
+Deploy the ml pipeline using fastapi, docker, kubernetes engine, and CD using github actions
 ---
 
 ## 🧰 Step 1: Install and Start MLflow
 
-1. Install MLflow:
+## Steps to Run the Iris Classifier API
 
+- install fastapi
+```bash
+pip install fastapi
+```
+or just install from requirements.txt
+```bash
+pip install -r requirements.txt
+```  
+Fire up Uvicorn for the ASGI app  
    ```bash
-   pip install mlflow
+   uvicorn iris_fastapi:app --reload --host 0.0.0.0
    ```
-2. Start the MLflow Tracking Server:
 
-   ```bash
-   mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 8100
-   ```
-   - vertexAI workbench
-   ```bash
-   mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 8100 --allowed-hosts "34.29.180.60:8100"
-   ```
+- Test using curl
+```bash
+curl -X 'POST' 'http://34.86.74.149:8000/predict/' \
+     -H 'Content-Type: application/json' \
+     -d '{"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2}'
+```
 
 ---
 
-## 💻 Step 2: Access MLflow from Local Machine
+## 💻 Step 2: Containerization
 
-Use the **external IP** of your instance and the configured port to access MLflow:
+Build the Docker image:
+```bash
+docker build -t iris-app:latest .
+```
 
 ```
 http://<external-ip>:8100
