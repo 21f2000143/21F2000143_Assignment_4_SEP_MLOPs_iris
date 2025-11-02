@@ -1,0 +1,31 @@
+artifact_path: /home/sachin/projects/21F2000143_Assignment_4_SEP_MLOPs_iris/mlruns/1/models/m-9c6573d0471e48a4a54482a08f559b56/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.3
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+is_signature_from_type_hint: false
+mlflow_version: 3.5.1
+model_id: m-9c6573d0471e48a4a54482a08f559b56
+model_size_bytes: 1733
+model_uuid: m-9c6573d0471e48a4a54482a08f559b56
+prompts: null
+run_id: be6c6a9800e74e24a18f812f7fae0572
+signature:
+  inputs: '[{"type": "double", "name": "sepal_length", "required": true}, {"type":
+    "double", "name": "sepal_width", "required": true}, {"type": "double", "name":
+    "petal_length", "required": true}, {"type": "double", "name": "petal_width", "required":
+    true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "int64", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-02 13:20:45.907955'

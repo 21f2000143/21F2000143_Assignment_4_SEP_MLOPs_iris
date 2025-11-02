@@ -52,6 +52,7 @@ y_test = test.iris_id
 
 print("Training model now")
 print(X_train.info())
+print(f"The shape of X_train is {X_train.shape}")
 reg.fit(X_train, y_train)
 
 print("Evaluating model now")
@@ -99,4 +100,4 @@ with open("metrics.csv", "a") as f:
     f.write(f"{today},{train_accuracy},{train_loss},{val_accuracy},{val_loss}\n")
 
 # Save model
-# dump(reg, "iris_model.bin")
+dump(reg, "iris_model.bin")

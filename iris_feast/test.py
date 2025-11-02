@@ -17,7 +17,8 @@ class TestModel(unittest.TestCase):
         latest_versions = client.get_latest_versions(model_name)
         latest_version = max([int(v.version) for v in latest_versions])
         print(f"Testing model: {model_name}, version: {latest_version}")
-        self.model = mlflow.sklearn.load_model(model_uri=f"models:/{model_name}/{latest_version}")
+        # self.model = mlflow.sklearn.load_model(model_uri=f"models:/{model_name}/{latest_version}")
+        self.model = load("iris_model.bin")
 
         # Set up feature store
         self.fs = feast.FeatureStore(repo_path="feature_repo/")

@@ -40,6 +40,7 @@ jobs:
         echo "$GCP_CREDENTIALS_JSON" > key.json
         export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+        dvc pull iris_feast/iris_model.bin.dvc
 
     - name: Start MLflow server (optional for testing)
       run: |

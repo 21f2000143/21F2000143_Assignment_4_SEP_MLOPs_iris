@@ -31,6 +31,10 @@ Integrate **MLflow** into the homework pipeline by:
    ```bash
    mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 8100
    ```
+   - vertexAI workbench
+   ```bash
+   mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 8100 --allowed-hosts "34.29.180.60:8100"
+   ```
 
 ---
 
