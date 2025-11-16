@@ -46,7 +46,7 @@ docker build -t iris-app:latest .
 
 - Create the container and start
 ```bash
-docker run -d --name iris-model -p 8000:8000 iris-app:latest
+docker run -d --name iris-model -p 8100:8100 iris-app:latest
 ```
 - Start the existing container
 ```bash
